@@ -8,7 +8,6 @@ use regex::Regex;
 use std::collections::HashMap;
 use std::ffi::OsString;
 use std::fs;
-use std::io::prelude::*;
 use std::path::Path;
 use std::path::PathBuf;
 use std::process::Command;
@@ -112,8 +111,8 @@ fn hashmap_from_source(source_path: PathBuf, file_encoding: &str) -> HashMap<Str
         match lines.next() {
             Some(line) => {
                 for cap in string_key_re.captures_iter(&line) {
-                    let n_formats = format_strings_re.captures_iter(&cap.at(2).unwrap()).count();
-                    source_strings.insert(cap.at(1).unwrap().to_string(), n_formats);
+                    let n_formats = format_strings_re.captures_iter(&cap.get(2).unwrap().as_str()).count();
+                    source_strings.insert(cap.get(1).unwrap().as_str().to_string(), n_formats);
                 }
             },
             None => { break }
