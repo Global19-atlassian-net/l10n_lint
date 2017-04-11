@@ -25,17 +25,23 @@ struct Args {
     arg_translations: String,
 }
 
+
+// Ensures that all your translated strings have the same number of format parameters
+// as your source strings.
 fn main() {
     let args: Args = Docopt::new(USAGE)
                             .and_then(|d| d.decode())
                             .unwrap_or_else(|e| e.exit());
     validate_args(&args);
 
+    // Input Strings
     let source_filename = &args.arg_source;
     let source_strings = hashmap_from_source(path_from_string(source_filename), "utf-8");
 
+    // Strings to compare to
     let mut language_files = language_files_from_dir(&args.arg_translations);
 
+    // Don't compare the source strings with itself.
     language_files.iter().position(|file| file.to_str().eq(&path_from_string(source_filename).to_str()) ).map(|e| language_files.remove(e));
 
     for language_file in language_files {
