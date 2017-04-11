@@ -1,5 +1,5 @@
 [package]
-name = "iStringsCheck"
+name = "l10n_lint"
 version = "0.1.0"
 authors = ["Frederic Jacobs <github@fredericjacobs.com>"]
 description = "iStringsCheck is an utility to verify completeness of .strings (iOS & OS X) translations files and the count of their format attributes."
