@@ -31,12 +31,18 @@ fn main() {
                             .and_then(|d| d.decode())
                             .unwrap_or_else(|e| e.exit());
     validate_args(&args);
-    let source_strings = hashmap_from_source(args.arg_source);
 
-    for language_file in language_files_from_dir(&args.arg_translations).iter() {
+    let source_filename = &args.arg_source;
+    let source_strings = hashmap_from_source(path_from_string(source_filename), "utf-8");
+
+    let mut language_files = language_files_from_dir(&args.arg_translations);
+
+    language_files.iter().position(|file| file.to_str().eq(&path_from_string(source_filename).to_str()) ).map(|e| language_files.remove(e));
+
+    for language_file in language_files {
         println!( "Parsing language file {}", language_file.display());
 
-        let translated_strings = hashmap_from_source(language_file.to_str().unwrap().to_string());
+        let translated_strings = hashmap_from_source(language_file, "utf-8");
 
         compare_strings(&source_strings, &translated_strings);
 
@@ -81,11 +87,11 @@ fn language_files_from_dir(dir_string: &String) -> Vec<PathBuf> {
     return string_files;
 }
 
-fn hashmap_from_source(source_path: String) -> HashMap<String, usize> {
+fn hashmap_from_source(source_path: PathBuf, file_encoding: &str) -> HashMap<String, usize> {
     let mut source_strings: HashMap<String, usize> = HashMap::new();
     // Apple Strings files are UTF-16 encoded, processing them in UTF-8
     let utf8_conversion_out = Command::new("iconv")
-                                .arg("-f").arg("utf-16")
+                                .arg("-f").arg(file_encoding)
                                 .arg("-t").arg("utf-8")
                                 .arg(&source_path).output()
                                 .unwrap_or_else(|e| { panic!("failed to execute process: {}", e) });
