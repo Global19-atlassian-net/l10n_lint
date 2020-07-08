@@ -39,7 +39,7 @@ fn main() {
     let source_strings = hashmap_from_source(path_from_string(source_filename), "utf-8");
 
     // Strings to compare to
-    let mut language_files = language_files_from_dir(&args.arg_translations);
+    let mut language_files = language_files_from_dir(&args.arg_translations, source_filename);
 
     // Don't compare the source strings with itself.
     language_files.iter().position(|file| file.to_str().eq(&path_from_string(source_filename).to_str()) ).map(|e| language_files.remove(e));
@@ -64,9 +64,10 @@ fn compare_strings(source_strings :&HashMap<String, usize>, translated_strings: 
     }
 }
 
-fn language_files_from_dir(dir_string: &String) -> Vec<PathBuf> {
+fn language_files_from_dir(dir_string: &String, source_string: &String) -> Vec<PathBuf> {
     let mut paths = fs::read_dir(&Path::new(dir_string)).unwrap();
     let mut string_files :Vec<PathBuf> = vec![];
+    let source_filename = Path::new(source_string).file_name().unwrap_or(&OsString::new()).to_os_string().into_string().unwrap();
 
     loop {
         match paths.next() {
@@ -75,12 +76,12 @@ fn language_files_from_dir(dir_string: &String) -> Vec<PathBuf> {
                 let path_string: String = path.to_str().unwrap().to_string();
 
                 if is_folder(path.clone()){
-                    for file in &language_files_from_dir(&path_string) {
+                    for file in &language_files_from_dir(&path_string, source_string) {
                         string_files.push(file.clone());
                     }
                 } else {
-                    let extension = path.extension().unwrap_or(&OsString::new()).to_os_string().into_string().unwrap();
-                    if extension == "strings" {
+                    let file_name = path.file_name().unwrap_or(&OsString::new()).to_os_string().into_string().unwrap();
+                    if file_name == source_filename {
                         string_files.push(path);
                     }
                 }
